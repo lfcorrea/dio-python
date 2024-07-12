@@ -132,6 +132,7 @@ class ContaCorrente(Conta):
 class Historico:
     def __init__(self) -> None:
         self._transacoes = []
+        self._date_format = "%d-%m-%Y %H:%M"
 
     @property
     def transacoes(self):
@@ -142,7 +143,7 @@ class Historico:
             {
                 "tipo": transacao.__class__.__name__,
                 "valor": float(transacao.valor),
-                "data": datetime.now().strftime("%d-%m-%Y %H:%M:%S"),
+                "data": datetime.now().strftime(self._date_format),
             }
         )
 
@@ -155,7 +156,7 @@ class Historico:
         hoje = datetime.now().date()
         transacoes = []
         for transacao in self._transacoes:
-            data_transacao = datetime.strptime(transacao['data'], "%d-%m-%Y %H:%m:%S").date()
+            data_transacao = datetime.strptime(transacao['data'], self._date_format).date()
             if data_transacao == hoje:
                 transacoes.append(transacao)
         return transacoes
@@ -203,11 +204,12 @@ class Deposito(Transacao):
 
 
 def log_transacao(func, *args, **kwargs):
-    # ts = datetime.now().strftime("%d-%m-%Y %H:%M:%s")
-    # resultado = func(*args, **kwargs)
-    # print(f"{ts}\t{func.__name__}")
-    # return resultado
-    pass
+    def envelope(*args, **kwargs):
+        ts = datetime.now().strftime("%d-%m-%Y %H:%M:%s")
+        resultado = func(*args, **kwargs)
+        print(f"{ts}\t{func.__name__}")
+        return resultado
+    return envelope
 
 CRIAR_USUARIO = "u"
 CRIAR_CONTA = "c"
